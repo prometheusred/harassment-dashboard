@@ -16,10 +16,14 @@ jsonschema==2.6.0
 jupyter-core==4.4.0
 MarkupSafe==1.0
 nbformat==4.4.0
+oauthlib==2.0.6
 plotly==2.4.1
+PySocks==1.6.8
 pytz==2018.3
 requests==2.18.4
+requests-oauthlib==0.8.0
 six==1.11.0
 traitlets==4.3.2
+tweepy==3.6.0
 urllib3==1.22
 Werkzeug==0.14.1
