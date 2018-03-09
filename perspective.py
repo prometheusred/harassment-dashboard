@@ -24,9 +24,9 @@ class Perspective(object):
     def __init__(self, key):
         self.key = key
 
-    def score(self, text, models=['TOXICITY']):
+    def score(self, text, models=['TOXICITY', 'SEVERE_TOXICITY']):
         """
-        Return scores for a string of text given a list of models to score with.
+        Get scores for a string of text given a list of models to score with.
         A score represents probability that the given text is what a given model
         is looking for.  e.g. 100% TOXICITY score means the text is very likely
         to be toxic.
@@ -51,3 +51,20 @@ class Perspective(object):
                                  headers=headers,
                                  params=query_string)
         return response.json()
+
+    def scores(self, texts, models=['TOXICITY', 'SEVERE_TOXICITY']):
+        """
+        Same as score but handles a list of texts
+
+        Returns:
+            list: scores, each a dict
+        """
+        print ('scoring...')
+        count = 1
+        scores = []
+        for text in texts:
+            print(count)
+            count += 1
+            score = self.score(text, models)
+            scores.append(score)
+        return scores
