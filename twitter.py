@@ -70,4 +70,3 @@ def scrub_tweets(tweets):
             remaining_words = compiled_scrub_pattern.findall(tweet.full_text)
             scrubbed_tweet_text.append(' '.join(remaining_words))
         return scrubbed_tweet_text
-        #print(tweets[0].full_text)

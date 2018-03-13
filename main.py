@@ -1,6 +1,6 @@
 import os
 
-from perspective import Perspective
+from perspective import Perspective, scrub_scores
 from twitter import Twitter, scrub_tweets
 
 
@@ -16,7 +16,7 @@ twitter_client = Twitter(twitter_consumer_key, twitter_consumer_secret)
 # In addition, I belive that the cow jumped over the moon. And the robot killed \
 # all humans.  I love that.  And you suck.'
 
-tweets = twitter_client.tweets_at('@the_dismal_tide')
+tweets = twitter_client.tweets_at('@realDonaldTrump')
 tweet_texts = scrub_tweets(tweets)
 
 scores = perspective_client.scores(tweet_texts)

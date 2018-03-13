@@ -68,3 +68,17 @@ class Perspective(object):
             score = self.score(text, models)
             scores.append(score)
         return scores
+
+def scrub_scores(scores):
+    """
+    convert score response (list of json) to list of summary scores
+    for TOXICITY
+    """
+    new_scores = []
+    for s in scores:
+        if 'attributeScores' in s:
+            score = s['attributeScores']['TOXICITY']['summaryScore']['value']
+            new_scores.append(round(score * 100))
+    return new_scores
+
+
