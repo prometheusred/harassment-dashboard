@@ -1,5 +1,7 @@
 import json
 import requests
+#import asyncio
+#import concurrent.futures
 
 
 class Perspective(object):
@@ -23,6 +25,16 @@ class Perspective(object):
 
     def __init__(self, key):
         self.key = key
+        self.s = requests.Session()
+        self.headers = {'content-type': 'application/json'}
+        self.query_string = {'key': self.key}
+        self.url = self.base_url + '/comments:analyze'
+
+        # r = requests.Request('POST',
+        #                      url,
+        #                      headers=headers,
+        #                      params=query_string)
+        #self.prepped_request = self.s.prepare_request(r)
 
     def score(self, text, models=['TOXICITY', 'SEVERE_TOXICITY']):
         """
@@ -38,18 +50,26 @@ class Perspective(object):
         Returns:
              dict: summary scores and span scores for requested models
         """
-        headers = {'content-type': 'application/json'}
-        query_string = {'key': self.key}
-        url = self.base_url + '/comments:analyze'
+
+        # key = self.key
+        # headers = {'content-type': 'application/json'}
+        # query_string = {'key': self.key}
+        # url = self.base_url + '/comments:analyze'
+
         text = text[:3000]
+
         requested_models = {model: {}
                              for model in models if model in self.all_models}
         payload_data = json.dumps(
             {'comment': {'text': text}, 'requestedAttributes': requested_models})
-        response = requests.post(url,
-                                 data=payload_data,
-                                 headers=headers,
-                                 params=query_string)
+
+        #response = self.s.send(self.prepped_request)
+
+        response = self.s.post(self.url,
+                                data=payload_data,
+                                headers=self.headers,
+                                params=self.query_string)
+
         return response.json()
 
     def scores(self, texts, models=['TOXICITY', 'SEVERE_TOXICITY']):

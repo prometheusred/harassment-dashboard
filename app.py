@@ -6,6 +6,7 @@ import dash_core_components as dcc
 from flask_caching import Cache
 import os
 import plotly.graph_objs as go
+import time
 
 from perspective import Perspective, scrub_scores
 from twitter import Twitter, scrub_tweets
@@ -30,21 +31,23 @@ app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/brPBPO.css"
 
 
 colors = {
-    'background': '#373365',
-    'text': '#fff'
+    #'background': '#373365',
+    'background': 'white',
+    #'text': '#fff'
+    'text': 'black'
 }
 
 explanation = 'This dashboard visualizes toxic language in Tweets and offers a way to engage to help the harassed.'
 
 basic_style = {'textAlign': 'center',
                'margin': '40px 300px',
-               'color': '#fff'}
+               'color': 'black'}
 
 spread_style = {'margin': '5px'}
 
 submit_style={'color': colors['text'],
               'borderRadius': '4px',
-              'border': '1px solid #fff',
+              'border': '1px solid black',
               'boxSizing': 'borderBox',
               'display': 'inline-block',
               'backgroundColor': 'transparent',
@@ -77,7 +80,7 @@ app.layout = html.Div([
     dcc.Graph(id='toxicity-over-time', style={'margin': '50px'})
 
 
-], style={'color': '#fff',
+], style={'color': 'black',
           'columnCount': 1,
           'left': 0,
           'top': 0,
@@ -114,7 +117,7 @@ def update_graph(n_clicks, input_value):
     return {
         'data': [trace],
         'layout': dict(
-            xaxis={'type': 'linear', 'title': 'tweets (over time)'},
+            xaxis={'type': 'linear', 'title': 'tweets'},
             yaxis={'title': 'toxicity (%)', 'range': [0, 100]},
             #margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
             #legend={'x': 0, 'y': 1},
@@ -123,11 +126,21 @@ def update_graph(n_clicks, input_value):
         )
     }
 
-@cache.memoize(timeout=60*15)  # in seconds
+@cache.memoize(timeout=60*15)  # 15 minutes
 def look_up(input_value):
+    tweet_start = time.time()
     tweets = twitter_client.tweets_at(input_value)
     tweets = scrub_tweets(tweets)
+    tweet_end = time.time()
+    tweet_time = tweet_end - tweet_start
+
+    score_start = time.time()
     scores = scrub_scores(perspective_client.scores(tweets))
+    score_end = time.time()
+    score_time = score_end - score_start
+
+    print(f"tweet request time: {tweet_time}")
+    print(f"score request time: {score_time}")
     return scores
 
 
