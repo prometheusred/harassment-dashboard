@@ -1,5 +1,7 @@
 import json
 import requests
+import functools
+import operator
 #import asyncio
 #import concurrent.futures
 
@@ -72,33 +74,41 @@ class Perspective(object):
 
         return response.json()
 
-    def scores(self, texts, models=['TOXICITY', 'SEVERE_TOXICITY']):
+    def scores(self, tweets_df, models=['TOXICITY', 'SEVERE_TOXICITY']):
         """
         Same as score but handles a list of texts
 
+        Args:
+            DataFrame: tweets
+
         Returns:
-            list: scores, each a dict
+            DataFrame: adds unpacked scores to what it recieves
         """
-        print ('scoring...')
-        count = 1
-        scores = []
-        for text in texts:
-            print(count)
-            count += 1
-            score = self.score(text, models)
-            scores.append(score)
-        return scores
+        print('scoring...')
+        tweets_df['score'] = tweets_df['scrubbed_text'].apply(self.score)
+        for model in models:
+            tweets_df[model + '_score'] = tweets_df['score'].apply(unpack_score,
+                                                                   model_name=model)
+        return tweets_df
 
-def scrub_scores(scores):
+def unpack_score(score, **kwargs):
     """
-    convert score response (list of json) to list of summary scores
-    for TOXICITY
-    """
-    new_scores = []
-    for s in scores:
-        if 'attributeScores' in s:
-            score = s['attributeScores']['TOXICITY']['summaryScore']['value']
-            new_scores.append(round(score * 100))
-    return new_scores
+    Pulls specific model score out of score json.
+    If perspective can't score text, 0 is used.
 
+    Args:
+        score(dict): complete score json for a tweet
+        kwargs: name of the model to unpack score
+
+    Returns:
+        model_score: integer that represents percentage score for a given model
+    """
+    model_name = kwargs.get('model_name')
+    print(score)
+    if 'attributeScores' in score:
+        model_score = round(
+        score['attributeScores'][model_name]['summaryScore']['value'] * 100)
+    else:
+        model_score = 0
+    return model_score
 

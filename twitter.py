@@ -3,6 +3,7 @@ import os
 import re
 
 import tweepy
+import pandas as pd
 
 #from tweepy.streaming import StreamListener
 #from tweepy import OAuthHandler
@@ -56,17 +57,27 @@ class Twitter(object):
             tweet_count += len(new_tweets)
             max_id = new_tweets[-1].id
             tweets.extend(new_tweets)
-        return tweets
+        return pd.DataFrame(t._json for t in tweets)
+
 
 compiled_scrub_pattern = re.compile(r'(?<![#@])\b\w+\b')
 def scrub_tweets(tweets):
         """
         Currently just strips @mentions and #hashtags out of full_text field of
         tweepy Status object
+
+        Args:
+            tweets(dataframe)
+
+        Returns:
+            tweets(dataframe)
         """
         print('scrubbing...!')
-        scrubbed_tweet_text = []
-        for tweet in tweets:
-            remaining_words = compiled_scrub_pattern.findall(tweet.full_text)
-            scrubbed_tweet_text.append(' '.join(remaining_words))
-        return scrubbed_tweet_text
+        tweets['scrubbed_text'] = tweets['full_text'].apply(scrub_tweet)
+        return tweets
+
+def scrub_tweet(tweet):
+    print(tweet)
+    remaining_words = compiled_scrub_pattern.findall(tweet)
+    return ' '.join(remaining_words)
+
