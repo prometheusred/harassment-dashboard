@@ -22,7 +22,7 @@ class Twitter(object):
                               wait_on_rate_limit=True,
                               wait_on_rate_limit_notify=True)
 
-    def tweets_at(self, handle, max_tweets=100):
+    def tweets_at(self, handle, max_tweets=50):
         """
         Get tweets at a @handle.  Retweets of that @handle are filtered out.
 
@@ -35,13 +35,11 @@ class Twitter(object):
         """
         search_query = handle + self.retweet_filter
         max_id = -1
-        tweets_per_qry = 100
+        tweets_per_qry = 50
         since_id = None
         tweet_count = 0
         tweets = []
         while tweet_count < max_tweets:
-            print(tweet_count)
-            print()
             if (max_id <= 0):
                 new_tweets = self.api.search(q=search_query,
                                              count=tweets_per_qry,
@@ -77,7 +75,6 @@ def scrub_tweets(tweets):
         return tweets
 
 def scrub_tweet(tweet):
-    print(tweet)
     remaining_words = compiled_scrub_pattern.findall(tweet)
     return ' '.join(remaining_words)
 

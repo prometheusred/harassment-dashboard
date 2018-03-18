@@ -42,7 +42,7 @@ class Perspective(object):
         """
         Get scores for a string of text given a list of models to score with.
         A score represents probability that the given text is what a given model
-        is looking for.  e.g. 100% TOXICITY score means the text is very likely
+        is testing for.  e.g. 100% TOXICITY score means the text is very likely
         to be toxic.
 
         Args:
@@ -64,14 +64,11 @@ class Perspective(object):
                              for model in models if model in self.all_models}
         payload_data = json.dumps(
             {'comment': {'text': text}, 'requestedAttributes': requested_models})
-
         #response = self.s.send(self.prepped_request)
-
         response = self.s.post(self.url,
-                                data=payload_data,
-                                headers=self.headers,
-                                params=self.query_string)
-
+                               data=payload_data,
+                               headers=self.headers,
+                               params=self.query_string)
         return response.json()
 
     def scores(self, tweets_df, models=['TOXICITY', 'SEVERE_TOXICITY']):
@@ -104,7 +101,6 @@ def unpack_score(score, **kwargs):
         model_score: integer that represents percentage score for a given model
     """
     model_name = kwargs.get('model_name')
-    print(score)
     if 'attributeScores' in score:
         model_score = round(
         score['attributeScores'][model_name]['summaryScore']['value'] * 100)
