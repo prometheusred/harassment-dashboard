@@ -49,15 +49,15 @@ center_el = {'width': '600px',
              'margin': '50px auto'}
 
 center_container = {'margin': '0px auto',
-                    'width': '300px',
+                    'width': '340px',
                     'textAlign': 'center'}
 
 bot_container = {'margin': '0px auto',
                  'width': '100%'}
 
 left_el = {'float': 'left'}
-right_el = {'margin': '24px 0 0 2px',
-            'height': '37px'}
+right_el = {'margin': '24px 0 0 -28px',
+            'height': '38px'}
 
 left_graph = {'float': 'left',
               'width': '50%',
