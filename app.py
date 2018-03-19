@@ -44,28 +44,6 @@ colors = {
 
 explanation = 'This dashboard visualizes toxic language in Tweets and offers a way to engage to help the harassed.'
 
-# basic_style = {'textAlign': 'center',
-#                'margin': '40px 300px',
-#                'color': 'black'}
-basic_style = {}
-
-#spread_style = {'margin': '5px'}
-spread_style = {}
-
-submit_style = {'color': colors['text'],
-                'borderRadius': '4px',
-                'border': '1px solid black',
-                'display': 'inline-block',
-                'backgroundColor': 'transparent',
-                'margin': '5px'}
-
-text_box_style = {'color': colors['text'],
-                  'display': 'inline-block',
-                  'margin': '40px 300px 20px 300px',
-                  'width': '60%',
-                  'height': '30px',
-                  'textAlign': 'center'}
-
 center_el = {'width': '600px',
              'textAlign': 'center',
              'margin': '50px auto'}
