@@ -26,8 +26,9 @@ twitter_client = Twitter(twitter_consumer_key, twitter_consumer_secret)
 app = dash.Dash('harassment dashboard')
 server = app.server
 CACHE_CONFIG = {
-    'CACHE_TYPE': 'filesystem',
-    'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'localhost:6379')}
+    'CACHE_TYPE': 'redis',
+    #'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'localhost:6379')
+    'CACHE_REDIS_URL': os.environ.get('REDIS_URL')}
 cache = Cache()
 cache.init_app(app.server, config=CACHE_CONFIG)
 
