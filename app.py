@@ -146,8 +146,8 @@ def request_scores(n_clicks, input_value):
 
 
 
-@app.callback(Output('', 'n_clicks'),
-              [Input('submit-button', 'toxicity-over-time')])
+# @app.callback(Output('', 'n_clicks'),
+#               [Input('submit-button', 'toxicity-over-time')])
 
 @app.callback(Output('full-text', 'children'),
               [#Input('toxicity-over-time', 'hoverData'),
