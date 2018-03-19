@@ -136,8 +136,18 @@ def request_scores(n_clicks, input_value):
     """
     if n_clicks:
         print('request_scores')
-        return global_store(input_value).to_json(date_format='iso',
+        try:
+            return global_store(input_value).to_json(date_format='iso',
                                                  orient='split')
+        except Exception as e:
+            print('**ERROR**')
+            print(e)
+            print(input_value)
+
+
+
+@app.callback(Output('', 'n_clicks'),
+              [Input('submit-button', 'toxicity-over-time')])
 
 @app.callback(Output('full-text', 'children'),
               [#Input('toxicity-over-time', 'hoverData'),
@@ -251,7 +261,7 @@ def update_pie(tweets_json):
             )
     }
 
-@cache.memoize(timeout=60*15)  # 15 minutes
+@cache.memoize(timeout=60*30)  # 15 minutes
 def global_store(input_value):
     tweet_start = time.time()
     tweets = twitter_client.tweets_at(input_value)
