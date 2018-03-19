@@ -53,7 +53,7 @@ center_container = {'margin': '0px auto',
                     'width': '340px',
                     'textAlign': 'center'}
 
-bot_container = {'margin': '0px auto',
+bot_container = {'margin': '100px 60px',
                  'width': '100%'}
 
 left_el = {'float': 'left'}
@@ -68,7 +68,8 @@ right_text = {'height': '20px',
               'height': '400px',
               'display': 'block',
               'overflow': 'hidden',
-              'margin': '50px auto',
+              'margin': '0',
+              'paddingLeft': '98px',
               'textAlign': 'left'}
 
 
@@ -99,7 +100,7 @@ app.layout = html.Div([
     html.Div(children=[
 
         dcc.Graph(id='toxicity-pie', style=left_graph),
-        html.Div(children=[html.P(children='tweet tweet!',
+        html.Div(children=[html.P(children='Hover over graph to see tweets...',
                                   id='full-text', style={'marginTop': 50}),
                            html.A(html.Button('Join the conversation!'),
                                   href='https://twitter.com'),],
