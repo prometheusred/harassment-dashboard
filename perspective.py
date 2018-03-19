@@ -65,10 +65,15 @@ class Perspective(object):
         payload_data = json.dumps(
             {'comment': {'text': text}, 'requestedAttributes': requested_models})
         #response = self.s.send(self.prepped_request)
-        response = self.s.post(self.url,
-                               data=payload_data,
-                               headers=self.headers,
-                               params=self.query_string)
+
+        try:
+            response = self.s.post(self.url,
+                                   data=payload_data,
+                                   headers=self.headers,
+                                   params=self.query_string)
+        except requests.exceptions.RequestException as e:
+            print(e)
+            return {'error': e}
         return response.json()
 
     def scores(self, tweets_df, models=['TOXICITY', 'SEVERE_TOXICITY']):
