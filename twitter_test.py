@@ -93,3 +93,91 @@ print(max_id)
 #     stream.filter(track=['hate'])
 
 #     print('ran it***************************************')
+
+# @app.callback(Output('toxicity-hist', 'figure'),
+#               [Input('signal', 'children')])
+# def update_hist(tweets_json):
+#     if not tweets_json:
+#         raise PreventUpdate('no data yet!')
+#     tweets_df = pd.read_json(tweets_json, orient='split')
+
+#     counts, xbins = np.histogram(tweets_df['TOXICITY_score'], range=(0,100))
+#     favorite_count = []
+#     for i, bin_end in enumerate(xbins):
+#         if i == 0:
+#             continue
+#         favorite_count.append(
+#         tweets_df[(tweets_df['TOXICITY_score'] < xbins[i]) &
+#                   (tweets_df['TOXICITY_score'] > xbins[i - 1])]['favorite_count'].sum()
+#         )
+#     favorite_norm = [round(float(i)/sum(favorite_count) * 100) for i in favorite_count]
+
+#     toxicity_data = dict(
+#         x=tweets_df['TOXICITY_score'],
+#         type='histogram',
+#         name='toxicity %',
+#         opacity=.7,
+#         marker=dict(
+#             color='blue',
+#         ),
+#         xbins=dict(
+#             start=0,
+#             end=100,
+#             size=10
+#         ),
+#     )
+
+#     favorited_data = dict(
+#         x=list(range(1,100, 10)),
+#         y=favorite_norm,
+#         type='bar',
+#         name='favorited %',
+#         opacity=.7,
+#         marker=dict(
+#             color='#800000',
+#         ),
+#         xbins=dict(
+#             start=0,
+#             end=100,
+#             size=10
+#         ),
+
+#     )
+
+#     return {
+#         'data': [toxicity_data, favorited_data],
+#         'layout': dict(
+#             type='layout',
+#             xaxis=dict(
+#                 title='Toxicity/Favorited %'
+#             ),
+#             yaxis=dict(
+#                 title='Toxicity Occurances'
+#             ),
+#             bargap=0.05,
+#             title='What percentage of favorites go to different amounts of toxicity?',
+#             groupbargap=.1,
+#             )
+#     }
+
+    # dcc.Interval(id='interval-component',
+    #              interval=1000,
+    #              n_intervals=0,
+    #              disabled=False),
+
+
+# @app.callback(Output('blah', 'children'),
+#               [Input('interval-component', 'n_intervals')])
+# def three(interval):
+
+#     if not interval:
+#         raise PreventUpdate('no data yet!')
+
+#     print(interval)
+
+#     # print(interval)
+#     # if interval == 3:
+#     #     print('True')
+#     #     return False
+#     # return True
+#     return interval

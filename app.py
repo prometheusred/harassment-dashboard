@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#import cufflinks as cf
 import dash
 from dash.dependencies import Input, Output, State, Event
 from dash.exceptions import PreventUpdate
@@ -34,6 +33,7 @@ cache.init_app(app.server, config=CACHE_CONFIG)
 
 app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
 #app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/brPBPO.css"})
+app.css.append_css({"external_url": "https://codepen.io/prometheusred/pen/MVbJvO.css"})
 
 colors = {
     #'background': '#373365',
@@ -44,18 +44,20 @@ colors = {
 
 explanation = 'This dashboard visualizes toxic language in Tweets and offers a way to engage to help the harassed.'
 
-basic_style = {'textAlign': 'center',
-               'margin': '40px 300px',
-               'color': 'black'}
+# basic_style = {'textAlign': 'center',
+#                'margin': '40px 300px',
+#                'color': 'black'}
+basic_style = {}
 
-spread_style = {'margin': '5px'}
+#spread_style = {'margin': '5px'}
+spread_style = {}
 
 submit_style = {'color': colors['text'],
                 'borderRadius': '4px',
                 'border': '1px solid black',
                 'display': 'inline-block',
                 'backgroundColor': 'transparent',
-                'margin': spread_style['margin']}
+                'margin': '5px'}
 
 text_box_style = {'color': colors['text'],
                   'display': 'inline-block',
@@ -64,53 +66,71 @@ text_box_style = {'color': colors['text'],
                   'height': '30px',
                   'textAlign': 'center'}
 
+center_el = {'width': '600px',
+             'textAlign': 'center',
+             'margin': '50px auto'}
+
+center_container = {'margin': '0px auto',
+                    'width': '300px',
+                    'textAlign': 'center'}
+
+bot_container = {'margin': '0px auto',
+                 'width': '100%'}
+
+left_el = {'float': 'left'}
+right_el = {'margin': '24px 0 0 2px',
+            'height': '37px'}
+
+left_graph = {'float': 'left',
+              'width': '50%',
+              'marginTop': '-70px'}
+right_text = {'height': '20px',
+              'width': '400px',
+              'height': '400px',
+              'display': 'block',
+              'overflow': 'hidden',
+              'margin': '50px auto',
+              'textAlign': 'left'}
+
 
 app.layout = html.Div([
 
-    html.H1(children='Help the Harassed',
-            style=basic_style),
+    html.H1(children='Help the Harassed', style=center_el),
 
-    html.P(children=explanation,
-           style=basic_style),
+    html.P(children=explanation, style=center_el),
 
-    html.Div(children=[html.Label(children='Enter Twitter @handle',
-                                  style=spread_style),
-                       html.Div(children=dcc.Input(id='input-box',
-                                                   type='text',
-                                                   value='@',
-                                                   style={'color': 'black',
-                                                          'textAlign': 'center'}),
-                                style={}),
-                       html.Button('Submit',
-                                   id='submit-button',
-                                   style=submit_style),
-                       ],
-    style={'text-align': 'center'}),
+    html.Div(children=[
 
-    html.Div(children=html.P(id='full-text'), style={'height': '150px',
-                                                     'width': '40%',
-                                                     'display': 'block',
-                                                     'overflow': 'hidden',
-                                                     'margin': '20px auto',
-                                                     'textAlign': 'center'}),
+        html.Div(children=[
 
-    #html.P(id='placeholder'),
+            html.Label(children='Twitter @handle'),
+            dcc.Input(id='input-box',
+                      type='text',
+                      value='@')],
+
+                 style=left_el),
+
+        html.Button('Submit',
+                    id='submit-button', style=right_el),],
+
+             style=center_container),
 
     dcc.Graph(id='toxicity-over-time', style={'margin': '10px 5px 0px 5px'}),
 
-    dcc.Graph(id='toxicity-pie', style={'margin': '0px 300px'}),
+    html.Div(children=[
 
-    dcc.Graph(id='toxicity-hist', style={'margin': '5px 200px'}),
+        dcc.Graph(id='toxicity-pie', style=left_graph),
+        html.Div(children=[html.P(children='tweet tweet!',
+                                  id='full-text', style={'marginTop': 50}),
+                           html.A(html.Button('Join the conversation!'),
+                                  href='https://twitter.com'),],
+                 style=right_text)],
+
+             style=bot_container),
+
+
 
     html.Div(id='signal', style={'display': 'none'}),
-
-    html.P(id='blah', children='blah'),
-
-    dcc.Interval(id='interval-component',
-                 interval=1000,
-                 n_intervals=0,
-                 disabled=False),
-
 
 
 ], style={'color': 'black',
@@ -122,21 +142,6 @@ app.layout = html.Div([
           'position': 'fixed',
           'backgroundColor': colors['background']})
 
-@app.callback(Output('blah', 'children'),
-              [Input('interval-component', 'n_intervals')])
-def three(interval):
-
-    if not interval:
-        raise PreventUpdate('no data yet!')
-
-    print(interval)
-
-    # print(interval)
-    # if interval == 3:
-    #     print('True')
-    #     return False
-    # return True
-    return interval
 
 @app.callback(Output('signal', 'children'),
               [Input('submit-button', 'n_clicks')],
@@ -170,8 +175,9 @@ def show_tweet(hoverData, tweets_json):
     return full_text
 
 @app.callback(Output('toxicity-over-time', 'figure'),
-              [Input('signal', 'children')])
-def update_graph(tweets_json):
+              [Input('signal', 'children')],
+               state=[State('input-box', 'value')])
+def update_graph(tweets_json, handle):
     """
     Pulls data from signal and updates graph
 
@@ -212,14 +218,15 @@ def update_graph(tweets_json):
         'layout': dict(
             xaxis={'type': 'linear', 'title': 'tweets'},
             yaxis={'title': 'toxicity (%)', 'range': [0, 100]},
+            title=f"The last {len(x)} tweets at {handle}",
             #margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
-            #legend={'x': 0, 'y': 1},
+            legend={'x': 0.1, 'y': 1.1},
             hovermode='closest',
             type='layout'
         )
     }
 
-HIGH_THRESH = 90
+HIGH_THRESH = 85
 LOW_THRESH = 30
 
 @app.callback(Output('toxicity-pie', 'figure'),
@@ -245,8 +252,9 @@ def update_pie(tweets_json):
         labels=labels,
         values=values,
         text='toxicity',
-        hoverinfo='label+percent+name',
+        hoverinfo='label+percent',
         hole=.3,
+        textinfo='none',
         type='pie',
     )
 
@@ -254,79 +262,13 @@ def update_pie(tweets_json):
         'data': [data],
         'layout': dict(
             type='layout',
+            showlegend=False,
             annotations=[{
-                'font': {'size': 10},
+                'font': {'size': 14},
                 'showarrow': False,
                 'text': 'toxicity'}]
             )
     }
-
-@app.callback(Output('toxicity-hist', 'figure'),
-              [Input('signal', 'children')])
-def update_hist(tweets_json):
-    if not tweets_json:
-        raise PreventUpdate('no data yet!')
-    tweets_df = pd.read_json(tweets_json, orient='split')
-
-    counts, xbins = np.histogram(tweets_df['TOXICITY_score'], range=(0,100))
-    favorite_count = []
-    for i, bin_end in enumerate(xbins):
-        if i == 0:
-            continue
-        favorite_count.append(
-        tweets_df[(tweets_df['TOXICITY_score'] < xbins[i]) &
-                  (tweets_df['TOXICITY_score'] > xbins[i - 1])]['favorite_count'].sum()
-        )
-    favorite_norm = [round(float(i)/sum(favorite_count) * 100) for i in favorite_count]
-
-    toxicity_data = dict(
-        x=tweets_df['TOXICITY_score'],
-        type='histogram',
-        name='toxicity %',
-        opacity=.7,
-        marker=dict(
-            color='blue',
-        ),
-        xbins=dict(
-            start=0,
-            end=100,
-            size=10
-        ),
-    )
-
-    favorited_data = dict(
-        x=list(range(1,100, 10)),
-        y=favorite_norm,
-        type='bar',
-        name='favorited %',
-        opacity=.7,
-        marker=dict(
-            color='#800000',
-        ),
-        xbins=dict(
-            start=0,
-            end=100,
-            size=10
-        ),
-
-    )
-
-    return {
-        'data': [toxicity_data, favorited_data],
-        'layout': dict(
-            type='layout',
-            xaxis=dict(
-                title='Toxicity/Favorited %'
-            ),
-            yaxis=dict(
-                title='Toxicity Occurances'
-            ),
-            bargap=0.05,
-            title='What percentage of favorites go to different amounts of toxicity?',
-            groupbargap=.1,
-            )
-    }
-
 
 @cache.memoize(timeout=60*15)  # 15 minutes
 def global_store(input_value):
