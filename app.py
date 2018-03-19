@@ -266,7 +266,7 @@ def global_store(input_value):
 
         #print(f"tweet request time: {tweet_time}")
         #print(f"score request time: {score_time}")
-    return tweets_df
+        return tweets_df
 
 if __name__ == '__main__':
     app.run_server(debug=True, processes=6)
