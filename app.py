@@ -196,7 +196,8 @@ def update_graph(tweets_json, handle):
         'layout': dict(
             xaxis={'type': 'linear', 'title': 'tweets'},
             yaxis={'title': 'toxicity (%)', 'range': [0, 100]},
-            title=f"The last {len(x)} tweets at {handle}",
+            #title=f"The last {len(x)} tweets at {handle}",
+            title='The last {} tweets at {}'.format(len(x), handle),
             #margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
             legend={'x': 0.1, 'y': 1.1},
             hovermode='closest',
@@ -263,8 +264,8 @@ def global_store(input_value):
         score_end = time.time()
         score_time = score_end - score_start
 
-        print(f"tweet request time: {tweet_time}")
-        print(f"score request time: {score_time}")
+        #print(f"tweet request time: {tweet_time}")
+        #print(f"score request time: {score_time}")
     return tweets_df
 
 if __name__ == '__main__':
