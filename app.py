@@ -36,9 +36,7 @@ app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"
 app.css.append_css({"external_url": "https://codepen.io/prometheusred/pen/MVbJvO.css"})
 
 colors = {
-    #'background': '#373365',
     'background': 'white',
-    #'text': '#fff'
     'text': 'black'
 }
 
@@ -52,7 +50,8 @@ center_container = {'margin': '0px auto',
                     'width': '340px',
                     'textAlign': 'center'}
 
-bot_container = {'margin': '100px 60px',
+top_container = {'margin': '70px 0px -105px 0',
+                 'minWidth': '675px',
                  'width': '100%'}
 
 left_el = {'float': 'left'}
@@ -67,10 +66,9 @@ right_text = {'height': '20px',
               'height': '400px',
               'display': 'block',
               'overflow': 'hidden',
-              'margin': '0',
-              'paddingLeft': '98px',
+              'margin': '0 auto',
+              'paddingLeft': '50px',
               'textAlign': 'left'}
-
 
 app.layout = html.Div([
 
@@ -96,19 +94,20 @@ app.layout = html.Div([
 
     html.Div(id='toggle', children=[
 
-        dcc.Graph(id='toxicity-over-time', style={'margin': '10px 5px 0px 5px'}),
-
         html.Div(children=[
 
             dcc.Graph(id='toxicity-pie', style=left_graph),
             html.Div(id='convo',
-                     children=[html.P(children='Hover over graph to see tweets...',
+                     children=[html.Div(children='Hover over graph below to see tweets...',
                                       id='full-text', style={'marginTop': '50px'}),
                                html.A(html.Button(children=['Join the conversation!']),
                                       id='join-link',
                                       href='https://twitter.com'),],
                      style=right_text)],
-                 style=bot_container),
+                 style=top_container),
+
+        dcc.Graph(id='toxicity-over-time', style={'margin': '10px 10px 100px 10px'}),
+
     ]),
 
     html.Div(id='signal', style={'display': 'none'}),
@@ -174,7 +173,10 @@ def show_tweet(hoverData, tweets_json):
     #clicked_index = clickData['points'][0]['x'] - 1
     hovered_index = hoverData['points'][0]['x'] - 1
     full_text = tweets_df.iloc[hovered_index]['full_text']
-    return full_text
+    tweeter = tweets_df.iloc[hovered_index]['user'].get('screen_name')
+    output_string = '**{}**: {}'.format(tweeter, full_text)
+    return dcc.Markdown(output_string)
+    #return full_text
 
 @app.callback(Output('toggle', 'style'),
               [Input('submit-button', 'n_clicks')],
@@ -256,10 +258,6 @@ def update_pie(tweets_json):
                         (tweets_df['TOXICITY_score'] < HIGH_THRESH)],
               tweets_df[tweets_df['TOXICITY_score'] < LOW_THRESH]]
     values = [len(value) for value in values]
-
-
-    print(labels)
-    print(values)
 
     data = dict(
         labels=labels,
