@@ -27,13 +27,12 @@ app = dash.Dash('harassment dashboard')
 server = app.server
 CACHE_CONFIG = {
     'CACHE_TYPE': 'redis',
-    #'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'localhost:6379')
-    'CACHE_REDIS_URL': os.environ.get('REDIS_URL')}
+    'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'localhost:6379')
+}
 cache = Cache()
 cache.init_app(app.server, config=CACHE_CONFIG)
 
 app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
-#app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/brPBPO.css"})
 app.css.append_css({"external_url": "https://codepen.io/prometheusred/pen/MVbJvO.css"})
 
 colors = {
@@ -106,14 +105,13 @@ app.layout = html.Div([
                      children=[html.P(children='Hover over graph to see tweets...',
                                       id='full-text', style={'marginTop': '50px'}),
                                html.A(html.Button(children=['Join the conversation!']),
+                                      id='join-link',
                                       href='https://twitter.com'),],
                      style=right_text)],
                  style=bot_container),
     ]),
 
-
     html.Div(id='signal', style={'display': 'none'}),
-
 
 ], style={'color': 'black',
           'left': 0,
@@ -123,7 +121,6 @@ app.layout = html.Div([
           'overflow': 'scroll',
           'position': 'fixed',
           'backgroundColor': colors['background']})
-
 
 @app.callback(Output('signal', 'children'),
               [Input('submit-button', 'n_clicks')],
@@ -146,17 +143,23 @@ def request_scores(n_clicks, input_value):
             print(e)
             print(input_value)
 
-# @app.callback(Output('join-button', 'children'),
-#               [Input('submit-button', 'n_clicks')],
-#               state=[State('input-box', 'value')])
-# def make_link(n_clicks, value):
-#     if not value and not n_clicks:
-#         raise PreventUpdate('no data yet!')
+@app.callback(Output('input-box', 'value'),
+              [Input('signal', 'children')],
+               state=[State('input-box', 'value')])
+def reset(tweets, input_value):
+    if not input_value or input_value == '@':
+        raise PreventUpdate('no data yet!')
+    return '@'
 
-#     print('***********')
-#     print(value)
-
-#     return html.Button(href='https://twitter.com' + value)
+@app.callback(Output('join-link', 'children'),
+              [Input('submit-button', 'n_clicks')],
+              state=[State('input-box', 'value')])
+def make_link(n_clicks, value):
+    if not value or not n_clicks or value == '@':
+        raise PreventUpdate('no data yet!')
+    return html.A(html.Button(children=['Join the conversation!']),
+                  id='join-link',
+                  href='https://twitter.com/' + value[1:len(value)])
 
 @app.callback(Output('full-text', 'children'),
               [#Input('toxicity-over-time', 'hoverData'),
@@ -280,7 +283,7 @@ def update_pie(tweets_json):
             )
     }
 
-@cache.memoize(timeout=60*30)  # 15 minutes
+@cache.memoize(timeout=60*30)  # 30 minutes
 def global_store(input_value):
     tweet_start = time.time()
     tweets = twitter_client.tweets_at(input_value)
