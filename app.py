@@ -95,19 +95,21 @@ app.layout = html.Div([
 
              style=center_container),
 
-    dcc.Graph(id='toxicity-over-time', style={'margin': '10px 5px 0px 5px'}),
+    html.Div(id='toggle', children=[
 
-    html.Div(children=[
+        dcc.Graph(id='toxicity-over-time', style={'margin': '10px 5px 0px 5px'}),
 
-        dcc.Graph(id='toxicity-pie', style=left_graph),
-        html.Div(children=[html.P(children='Hover over graph to see tweets...',
-                                  id='full-text', style={'marginTop': 50}),
-                           html.A(html.Button('Join the conversation!'),
-                                  href='https://twitter.com'),],
-                 style=right_text)],
+        html.Div(children=[
 
-             style=bot_container),
-
+            dcc.Graph(id='toxicity-pie', style=left_graph),
+            html.Div(id='convo',
+                     children=[html.P(children='Hover over graph to see tweets...',
+                                      id='full-text', style={'marginTop': '50px'}),
+                               html.A(html.Button(children=['Join the conversation!']),
+                                      href='https://twitter.com'),],
+                     style=right_text)],
+                 style=bot_container),
+    ]),
 
 
     html.Div(id='signal', style={'display': 'none'}),
@@ -144,10 +146,17 @@ def request_scores(n_clicks, input_value):
             print(e)
             print(input_value)
 
+# @app.callback(Output('join-button', 'children'),
+#               [Input('submit-button', 'n_clicks')],
+#               state=[State('input-box', 'value')])
+# def make_link(n_clicks, value):
+#     if not value and not n_clicks:
+#         raise PreventUpdate('no data yet!')
 
+#     print('***********')
+#     print(value)
 
-# @app.callback(Output('', 'n_clicks'),
-#               [Input('submit-button', 'toxicity-over-time')])
+#     return html.Button(href='https://twitter.com' + value)
 
 @app.callback(Output('full-text', 'children'),
               [#Input('toxicity-over-time', 'hoverData'),
@@ -163,6 +172,15 @@ def show_tweet(hoverData, tweets_json):
     hovered_index = hoverData['points'][0]['x'] - 1
     full_text = tweets_df.iloc[hovered_index]['full_text']
     return full_text
+
+@app.callback(Output('toggle', 'style'),
+              [Input('submit-button', 'n_clicks')],
+              state=[State('input-box', 'value')])
+def toggle_graphs(n_clicks, value):
+    if n_clicks:
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
 
 @app.callback(Output('toxicity-over-time', 'figure'),
               [Input('signal', 'children')],
@@ -227,6 +245,7 @@ def update_pie(tweets_json):
     """
     if not tweets_json:
         raise PreventUpdate('no data yet!')
+
     tweets_df = pd.read_json(tweets_json, orient='split')
     labels = ['high', 'medium', 'low']
     values = [tweets_df[tweets_df['TOXICITY_score'] > HIGH_THRESH],
@@ -243,9 +262,9 @@ def update_pie(tweets_json):
         labels=labels,
         values=values,
         text='toxicity',
-        hoverinfo='label+percent',
+        hoverinfo='percent',
         hole=.3,
-        textinfo='none',
+        textinfo='label',
         type='pie',
     )
 
