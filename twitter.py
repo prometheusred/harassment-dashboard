@@ -55,8 +55,9 @@ class Twitter(object):
             tweet_count += len(new_tweets)
             max_id = new_tweets[-1].id
             tweets.extend(new_tweets)
-        return pd.DataFrame(t._json for t in tweets)
-
+            tweets_df = pd.DataFrame(t._json for t in tweets)
+            tweets_df = scrub_tweets(tweets_df)
+        return tweets_df
 
 compiled_scrub_pattern = re.compile(r'(?<![#@])\b\w+\b')
 def scrub_tweets(tweets):
