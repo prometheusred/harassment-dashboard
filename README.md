@@ -3,10 +3,10 @@
 
 A hack based on Jigsaw's [Perspective API](https://www.perspectiveapi.com).  It is a simple dashboard that visualizes toxic langauge in tweets and allows you to jump into the conversation on twitter.  Just enter someone's twitter handle to see how much / if they are the target of toxicity and harassment.
 
-![Alt text](/images/toxicity-summary-image.png?raw=true "Toxicity Summary")
+![Alt text](/images/toxicity-summary-image-obfuscated.png?raw=true "Toxicity Summary")
 
 
-![Alt text](/images/toxicity-over-time-image.png?raw=true "Toxicity over time")
+![Alt text](/images/toxicity-over-time-image-obfuscated.png?raw=true "Toxicity over time")
 
 ## Requirements
 
