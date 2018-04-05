@@ -24,7 +24,7 @@ For now, I'll assume you're on a mac:
 
 2. Install redis with [homebrew](https://medium.com/@petehouston/install-and-config-redis-on-mac-os-x-via-homebrew-eb8df9a4f298): `brew install redis` and `brew services start redis`.
 
-3. Activte a [virtualenv](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/) and install python dependencies:`pip install -r requirements`
+3. Activate a [virtualenv](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/) and install python dependencies:`pip install -r requirements`
 
 4. Run locally with `python app.py` from the project directory and go to http://localhost:8050/ in your browser.
 
