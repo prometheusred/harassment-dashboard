@@ -12,6 +12,7 @@ A hack based on Jigsaw's [Perspective API](https://www.perspectiveapi.com).  It 
 
 1. python 3.6+
 2. Redis (right now only used for caching but hopefully to be used for a queue for intermediate results/loading in the near future)
+3. Your own keys for Twitter and the Perspective API (note: this app currently uses an app-wide key for twitter (no oauth for users) and hence there are security and rate-limit implications to keep in mind).
 
 The main libraries being used are Dash, a python data viz library that wraps up flask, d3, and React, and pandas for data manipulation/filtering.  Tweepy is used for pulling tweets and asyncio/aiohttp is used for parallizing requests to the perspective api.
 
