@@ -4,6 +4,7 @@ import functools
 import operator
 import asyncio
 from aiohttp import ClientSession
+from datetime import datetime
 #import concurrent.futures
 
 
@@ -91,6 +92,8 @@ class Perspective(object):
         return categorize_scores(tweets_df)
 
     def async_scores(self, tweets_df, models=['TOXICITY', 'SEVERE_TOXICITY']):
+        """
+        """
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         #loop = asyncio.get_event_loop()
@@ -101,6 +104,7 @@ class Perspective(object):
         for model in models:
             tweets_df[model + '_score'] = tweets_df['score'].apply(unpack_score,
                                                                   model_name=model)
+        loop.close()
         return categorize_scores(tweets_df)
 
     async def fetch(self, text, session, models):
@@ -124,14 +128,14 @@ class Perspective(object):
         async with ClientSession() as session:
             for t in texts:
                 task = asyncio.ensure_future(self.fetch(t, session, models))
-                tasks.append(task) # create list of tasks
-            return await asyncio.gather(*tasks) # gather task responses
+                tasks.append(task)
+            return await asyncio.gather(*tasks)
 
 
 
 def categorize_scores(tweets_df):
     """
-    Adds toxicity category info to tweets DataFrame
+    Adds toxicity category, display, and datetime info to tweets DataFrame
 
     Returns:
         Returns: tweets_df with boolean toxicity category columns: low, med, high
@@ -142,8 +146,12 @@ def categorize_scores(tweets_df):
     tweets_df['MED_LEVEL'] = ((tweets_df['TOXICITY_score'] > TOX_THRESH) &
                                 (tweets_df['SEVERE_TOXICITY_score'] < SEV_TOX_THRESH))
     tweets_df['HI_LEVEL'] = tweets_df['SEVERE_TOXICITY_score'] > SEV_TOX_THRESH
+    tweets_df['display_time'] = tweets_df['created_at'].apply(format_time)
     return tweets_df
 
+def format_time(time_stamp):
+    d = datetime.strptime(time_stamp, '%a %b %d %H:%M:%S +0000 %Y')
+    return d.strftime("%a %B %d %I:%M%p")
 
 def unpack_score(score, **kwargs):
     """
@@ -164,5 +172,3 @@ def unpack_score(score, **kwargs):
     else:
         model_score = 0
     return model_score
-
-

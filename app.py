@@ -38,7 +38,10 @@ app.css.append_css({"external_url": "https://codepen.io/prometheusred/pen/MVbJvO
 
 colors = {
     'background': 'white',
-    'text': 'black'
+    'text': 'black',
+    'high': '#D400F9',
+    'medium': '#6d60fe',
+    'low': '#25C1F9',
 }
 
 explanation = 'This dashboard visualizes toxic language in Tweets and offers a way to engage to help the harassed.'
@@ -114,13 +117,14 @@ app.layout = html.Div([
             #html.Div(children=[html.Div(id='table-container')], style=right_table)
             html.H1('Selected Tweets'),
             dt.DataTable(
-                rows=[{'text': 'na',
+                rows=[{'text': 'click bar graph above to select tweets',
                        'author': 'na',
                        'time': 'na',
                        'toxicity': 'na'}],
                 row_selectable=True,
                 filterable=True,
                 sortable=True,
+                #row_height=40,
                 selected_row_indices=[],
                 id='datatable'
             )
@@ -227,6 +231,9 @@ def show_tweet(hoverData, tweets_json):
               [Input('toxicity-bar', 'clickData'),
                Input('signal', 'children')])
 def make_table(clickData, tweets_json):
+    """
+    filter table data according to toxicity level clicked on in bar chart
+    """
     if not tweets_json or not clickData:
         raise PreventUpdate('no data yet!')
     tweets_df = pd.read_json(tweets_json, orient='split')
@@ -239,8 +246,8 @@ def make_table(clickData, tweets_json):
         df = tweets_df[tweets_df['HI_LEVEL'] == True]
     new_df = pd.DataFrame()
     new_df['text'] = df['full_text']
-    new_df['author'] = tweets_df['user'].apply(lambda t: t['screen_name'])
-    new_df['time'] = df['created_at']
+    new_df['author'] = df['user'].apply(lambda t: t['screen_name'])
+    new_df['time'] = df['display_time']
     new_df['toxicity'] = df['TOXICITY_score']
     return new_df.to_dict('records')
 
@@ -276,22 +283,27 @@ def update_bar(tweets_json, handle):
     low_count = tweets_df['LOW_LEVEL'].value_counts().get(True, 0)
     med_count = tweets_df['MED_LEVEL'].value_counts().get(True, 0)
     hi_count = tweets_df['HI_LEVEL'].value_counts().get(True, 0)
+    begin_date = tweets_df['display_time'].iloc[-1]
+    end_date = tweets_df['display_time'].iloc[0]
+    title = f"{begin_date}  –  {end_date}"
 
     data = dict(
         type='bar',
         x=['Low', 'Medium', 'High'],
         y=[low_count, med_count, hi_count],
         marker=dict(
-            color=['rgba(204,204,204,1)',
-                   'rgba(204,204,204,1)',
-                   'rgba(222,45,38,0.8)'])
+            color=[colors['low'],
+                   colors['medium'],
+                   colors['high']])
     )
 
     return {
         'data': [data],
         'layout': dict(
             type='layout',
-            title='Toxicity Summary: click on a bar to see low/med/high tweets below'
+            title=title,
+            xaxis={'title': 'toxicity level'},
+            yaxis={'title': 'count'},
         )
     }
 
@@ -314,7 +326,7 @@ def update_bar(tweets_json, handle):
 #     labels = range(0, stop, step)
 
 #     #low_toxicity = tweets_df[]
-    
+
 
 #     low_trace = dict(
 #         type='scatter',
@@ -390,45 +402,10 @@ def update_graph(tweets_json, handle):
     tweets_df = pd.read_json(tweets_json, orient='split')
     x = list(range(1, len(tweets_df) + 1))
 
-    #     med_trace = dict(
-#         type='scatter',
-#         name='medium',
-#         x=x,
-#         y=low_count + med_count,
-#         text=med_count,
-#         mode='lines',
-#         fill='tonexty',
-#     )
-#     hi_trace = dict(
-#         type='scatter',
-#         name='high',
-#         x=x,
-#         y=low_count + med_count + hi_count,
-#         text=hi_count,
-#         mode='lines',
-#         fill='tonexty',
-#     )
-
-
-#     return {
-#         'data': [low_trace, med_trace, hi_trace],
-#         'layout': dict(
-#             type='layout',
-#             title='Cumulative toxicity levels over time',
-#             showLegend=True,
-#             yaxis=dict(
-#                 type='linear',
-#                 range=[1, 100],
-#                 dtick=20,
-#             )
-#         )
-#     }
-
-
     toxicity_trace = dict(
         x=x,
         y=tweets_df['TOXICITY_score'],
-        mode='lines+markers',
+        mode='lines',
         fill='tonexty',
         name='toxicity',
         line=dict(width=0.5,
@@ -436,20 +413,8 @@ def update_graph(tweets_json, handle):
         type='scatter'
     )
 
-    severe_trace = dict(
-        x=x,
-        y=tweets_df['SEVERE_TOXICITY_score'],
-        mode='lines',
-        fill='tonexty',
-        line=dict(width=0.5,
-                  color='rgb(200, 200, 212)'),
-
-        name='severe toxicity',
-        type='scatter'
-    )
-
     return {
-        'data': [severe_trace, toxicity_trace],
+        'data': [toxicity_trace],
         'layout': dict(
             xaxis={'type': 'linear', 'title': 'tweets'},
             yaxis={'title': 'toxicity (%)', 'range': [0, 100]},

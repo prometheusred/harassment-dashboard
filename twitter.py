@@ -22,7 +22,7 @@ class Twitter(object):
                               wait_on_rate_limit=True,
                               wait_on_rate_limit_notify=True)
 
-    def tweets_at(self, handle, max_tweets=50):
+    def tweets_at(self, handle, max_tweets=400):
         """
         Get tweets at a @handle.  Retweets of that @handle are filtered out.
 
@@ -35,7 +35,7 @@ class Twitter(object):
         """
         search_query = handle + self.retweet_filter
         max_id = -1
-        tweets_per_qry = 50
+        tweets_per_qry = 100
         since_id = None
         tweet_count = 0
         tweets = []
@@ -55,8 +55,8 @@ class Twitter(object):
             tweet_count += len(new_tweets)
             max_id = new_tweets[-1].id
             tweets.extend(new_tweets)
-            tweets_df = pd.DataFrame(t._json for t in tweets)
-            tweets_df = scrub_tweets(tweets_df)
+        tweets_df = pd.DataFrame(t._json for t in tweets)
+        tweets_df = scrub_tweets(tweets_df)
         return tweets_df
 
 compiled_scrub_pattern = re.compile(r'(?<![#@])\b\w+\b')
