@@ -54,11 +54,12 @@ center_container = {'margin': '0px auto',
                     'width': '340px',
                     'textAlign': 'center'}
 
-top_container = {'margin': '80px 0px -105px 0',
-                 'minWidth': '675px',
+top_container = {'minWidth': '675px',
+                 'minHeight': '500px',
                  'width': '100%'}
 
 left_el = {'float': 'left'}
+
 right_el = {'margin': '24px 0 0 -28px',
             'height': '38px'}
 
@@ -66,22 +67,10 @@ left_graph = {'float': 'left',
               'width': '50%',
               'marginTop': '-70px'}
 
-right_text = {'height': '20px',
-              'width': '400px',
-              'height': '400px',
-              'display': 'block',
+right_text = {'flex': '1',
               'overflow': 'hidden',
-              'margin': '0 auto',
-              'paddingLeft': '50px',
+              'align-self': 'center',
               'textAlign': 'left'}
-
-right_table = {
-    'margin': '0 auto',
-    'display': 'block',
-    'width': '400px',
-    'height': '400px',
-    'paddingLeft': '50px',
-}
 
 app.layout = html.Div([
 
@@ -106,17 +95,18 @@ app.layout = html.Div([
 
     html.Div(id='toggle', children=[
 
+        html.H2(children='Toxicity Summary',
+                style={'margin': '120px 0 12px', 'textAlign': 'center'}),
+
+        html.P(children='(click bars to see tweets)',
+               style={'margin': '0 0 50px', 'textAlign': 'center'}),
+
         html.Div(children=[
 
-            dcc.Graph(id='toxicity-bar', style=center_el),
+            html.Div(children=[dcc.Graph(id='toxicity-bar')],
+                     style={'margin': '0 50px auto'}),
 
-            # html.Div(children=[html.Div(children='blarg!',
-            #                             id='placeholder-text', style={'marginTop': '50px'})],
-            #          style=right_text)
-
-            #html.Div(children=[html.Div(id='table-container')], style=right_table)
-            html.H1('Selected Tweets'),
-            dt.DataTable(
+            html.Div(dt.DataTable(
                 rows=[{'text': 'click bar graph above to select tweets',
                        'author': 'na',
                        'time': 'na',
@@ -127,26 +117,34 @@ app.layout = html.Div([
                 #row_height=40,
                 selected_row_indices=[],
                 id='datatable'
-            )
+            ), style={'margin': '10px auto'})
 
         ],
                  style=top_container),
 
         #dcc.Graph(id='toxicity-area', style={'margin': '100px 10px 100px 10px'}),
 
+        html.H2(children='Toxicity over time',
+                style={'margin': '120px 0 12px', 'textAlign': 'center'}),
+
+        html.P(children='(hover over time-series to see tweets)',
+               style={'margin': '0 0 50px', 'textAlign': 'center'}),
+
+
+
         html.Div(children=[
 
-            dcc.Graph(id='toxicity-pie', style=left_graph),
+            dcc.Graph(id='toxicity-over-time', style={'minHeight': '500px','flex': '3'}),
+
+            #dcc.Graph(id='toxicity-pie', style=left_graph),
             html.Div(children=[html.Div(children='Hover over graph below to see tweets...',
                                         id='full-text', style={'marginTop': '50px'}),
                                html.A(html.Button(children=['Join the conversation!']),
                                       id='join-link',
                                       href='https://twitter.com'),],
-                     style=right_text)],
-                 style={'margin': '350px 0 -180px 0'}),
+                     style=right_text)
 
-
-        dcc.Graph(id='toxicity-over-time', style={'margin': '100px 10px 100px 10px'}),
+        ], style={'display': 'flex'})
 
     ]),
 
@@ -209,20 +207,44 @@ def make_link(n_clicks, value):
                   id='join-link',
                   href='https://twitter.com/' + value[1:len(value)])
 
+"""
+Adds link to specific tweet -- for some reason causes infinite loop/
+callback won't stop firing.
+"""
+# @app.callback(Output('join-link', 'children'),
+#               [Input('toxicity-over-time', 'clickData'),
+#                Input('signal', 'children')])
+# def make_link_specific(clickData, tweets_json):
+#     """
+#     Create a link to target's twitter profile
+#     """
+#     print('**************')
+#     if not tweets_json or not clickData:
+#         raise PreventUpdate('no data yet!')
+#     tweets_df = pd.read_json(tweets_json, orient='split')
+#     clicked_index = clickData['points'][0]['x'] - 1
+#     tweet_id = tweets_df.iloc[clicked_index].get('id_str')
+#     tweeter = tweets_df.iloc[clicked_index]['user'].get('screen_name')
+#     link = f"https://twitter.com/{tweeter}/status/{tweet_id}"
+#     return html.A(html.Button(children=['Join the conversation!']),
+#                   id='join-link',
+#                   href=link)
+
 
 @app.callback(Output('full-text', 'children'),
-              [Input('toxicity-over-time', 'hoverData'),
+              [Input('toxicity-over-time', 'clickData'),
                Input('signal', 'children')])
-def show_tweet(hoverData, tweets_json):
+def show_tweet(clickData, tweets_json):
     """
     Create text box to show tweet on hover
     """
-    if not tweets_json or not hoverData:
+    print(clickData)
+    if not tweets_json or not clickData:
         raise PreventUpdate('no data yet!')
     tweets_df = pd.read_json(tweets_json, orient='split')
-    hovered_index = hoverData['points'][0]['x'] - 1
-    full_text = tweets_df.iloc[hovered_index]['full_text']
-    tweeter = tweets_df.iloc[hovered_index]['user'].get('screen_name')
+    click_index = clickData['points'][0]['x'] - 1
+    full_text = tweets_df.iloc[click_index]['full_text']
+    tweeter = tweets_df.iloc[click_index]['user'].get('screen_name')
     output_string = '**{}**: {}'.format(tweeter, full_text)
     return dcc.Markdown(output_string)
 
@@ -245,12 +267,19 @@ def make_table(clickData, tweets_json):
     elif clicked_tox_level == 'High':
         df = tweets_df[tweets_df['HI_LEVEL'] == True]
     new_df = pd.DataFrame()
+
+    #new_df['text'] = df.apply(make_link, axis=1)
+    #new_df['text'] = html.A(html.Button('great'),href='https://twitter.com')
     new_df['text'] = df['full_text']
-    new_df['author'] = df['user'].apply(lambda t: t['screen_name'])
+    new_df['author'] = df['screen_name']
     new_df['time'] = df['display_time']
     new_df['toxicity'] = df['TOXICITY_score']
     return new_df.to_dict('records')
 
+def make_link(tweet_row):
+    return tweet_row['full_text']
+    #return html.A(html.Button(children=[tweet_row['text']]),
+    #              href=f"https://twitter.com/{tweet_row['scren_name']}/status/{tweet_row['id_str']}")
 
 @app.callback(Output('toggle', 'style'),
               [Input('submit-button', 'n_clicks')],
@@ -285,7 +314,7 @@ def update_bar(tweets_json, handle):
     hi_count = tweets_df['HI_LEVEL'].value_counts().get(True, 0)
     begin_date = tweets_df['display_time'].iloc[-1]
     end_date = tweets_df['display_time'].iloc[0]
-    title = f"{begin_date}  –  {end_date}"
+    title = f"tweets at {handle}: {begin_date}  –  {end_date} (UTC)"
 
     data = dict(
         type='bar',
@@ -428,50 +457,50 @@ def update_graph(tweets_json, handle):
     }
 
 
-HIGH_THRESH = 85
-LOW_THRESH = 30
+# HIGH_THRESH = 85
+# LOW_THRESH = 30
 
-@app.callback(Output('toxicity-pie', 'figure'),
-              [Input('signal', 'children')])
-def update_pie(tweets_json):
-    """
-    Creates the pie graph of toxicity levels when recieving data.
+# @app.callback(Output('toxicity-pie', 'figure'),
+#               [Input('signal', 'children')])
+# def update_pie(tweets_json):
+#     """
+#     Creates the pie graph of toxicity levels when recieving data.
 
-    Returns:
-        dictionary that defines a plotly pie chart with given data
-    """
-    if not tweets_json:
-        raise PreventUpdate('no data yet!')
+#     Returns:
+#         dictionary that defines a plotly pie chart with given data
+#     """
+#     if not tweets_json:
+#         raise PreventUpdate('no data yet!')
 
-    tweets_df = pd.read_json(tweets_json, orient='split')
-    labels = ['high', 'medium', 'low']
-    values = [tweets_df[tweets_df['TOXICITY_score'] > HIGH_THRESH],
-              tweets_df[(tweets_df['TOXICITY_score'] > LOW_THRESH) &
-                        (tweets_df['TOXICITY_score'] < HIGH_THRESH)],
-              tweets_df[tweets_df['TOXICITY_score'] < LOW_THRESH]]
-    values = [len(value) for value in values]
+#     tweets_df = pd.read_json(tweets_json, orient='split')
+#     labels = ['high', 'medium', 'low']
+#     values = [tweets_df[tweets_df['TOXICITY_score'] > HIGH_THRESH],
+#               tweets_df[(tweets_df['TOXICITY_score'] > LOW_THRESH) &
+#                         (tweets_df['TOXICITY_score'] < HIGH_THRESH)],
+#               tweets_df[tweets_df['TOXICITY_score'] < LOW_THRESH]]
+#     values = [len(value) for value in values]
 
-    data = dict(
-        labels=labels,
-        values=values,
-        text='toxicity',
-        hoverinfo='percent',
-        hole=.3,
-        textinfo='label',
-        type='pie',
-    )
+#     data = dict(
+#         labels=labels,
+#         values=values,
+#         text='toxicity',
+#         hoverinfo='percent',
+#         hole=.3,
+#         textinfo='label',
+#         type='pie',
+#     )
 
-    return {
-        'data': [data],
-        'layout': dict(
-            type='layout',
-            showlegend=False,
-            annotations=[{
-                'font': {'size': 14},
-                'showarrow': False,
-                'text': 'toxicity'}]
-            )
-    }
+#     return {
+#         'data': [data],
+#         'layout': dict(
+#             type='layout',
+#             showlegend=False,
+#             annotations=[{
+#                 'font': {'size': 14},
+#                 'showarrow': False,
+#                 'text': 'toxicity'}]
+#             )
+#     }
 
 
 @cache.memoize(timeout=60*30)  # 30 minutes

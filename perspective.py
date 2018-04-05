@@ -147,6 +147,7 @@ def categorize_scores(tweets_df):
                                 (tweets_df['SEVERE_TOXICITY_score'] < SEV_TOX_THRESH))
     tweets_df['HI_LEVEL'] = tweets_df['SEVERE_TOXICITY_score'] > SEV_TOX_THRESH
     tweets_df['display_time'] = tweets_df['created_at'].apply(format_time)
+    tweets_df['screen_name'] = tweets_df['user'].apply(lambda t: t['screen_name'])
     return tweets_df
 
 def format_time(time_stamp):
