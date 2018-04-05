@@ -44,6 +44,6 @@ One of the easiest and free-est ways to deploy is with Heroku (though it shouldn
 
 2. [Hook up Heroku](https://devcenter.heroku.com/articles/getting-started-with-python#deploy-the-app) with `heroku create` in the project directory and [connect a free-tier instance of Redis](https://devcenter.heroku.com/articles/heroku-redis) to your Heroku project with `heroku addons:create heroku-redis:hobby-dev -a harassment-dashboard`.
 
-3. Set environment variables for your keys in the [heroku dashboard or in terminal](https://medium.com/taqtilebr/managing-herokus-app-environment-variables-d13fd99610b).
+3. Set environment variables (with the same names as above) for your keys in the [heroku dashboard or in terminal](https://medium.com/taqtilebr/managing-herokus-app-environment-variables-d13fd99610b).  The REDIS_URL key will be set automatically by Heroku.
 
 4. And finally, deploy with `git push heroku master`.  Go to the address generated to confirm the app is deployed.  You can [adjust Gunicorn settings](https://devcenter.heroku.com/articles/python-gunicorn) in the Procfile. And you can [see logs](https://devcenter.heroku.com/articles/logging) for your project with `heroku logs -a harassment-dashboard`.
