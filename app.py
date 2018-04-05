@@ -127,9 +127,8 @@ app.layout = html.Div([
         html.H2(children='Toxicity over time',
                 style={'margin': '120px 0 12px', 'textAlign': 'center'}),
 
-        html.P(children='(hover over time-series to see tweets)',
+        html.P(children='(click on time-series to see tweets)',
                style={'margin': '0 0 50px', 'textAlign': 'center'}),
-
 
 
         html.Div(children=[
@@ -137,8 +136,9 @@ app.layout = html.Div([
             dcc.Graph(id='toxicity-over-time', style={'minHeight': '500px','flex': '3'}),
 
             #dcc.Graph(id='toxicity-pie', style=left_graph),
-            html.Div(children=[html.Div(children='Hover over graph below to see tweets...',
+            html.Div(children=[html.Div(children='Hover over time-series to see tweets...',
                                         id='full-text', style={'marginTop': '50px'}),
+
                                html.A(html.Button(children=['Join the conversation!']),
                                       id='join-link',
                                       href='https://twitter.com'),],
