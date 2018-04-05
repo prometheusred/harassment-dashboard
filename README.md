@@ -26,9 +26,15 @@ For now, I'll assume you're on a mac:
 
 3. Activate a [virtualenv](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/) and install python dependencies:`pip install -r requirements`
 
-4. Run locally with `python app.py` from the project directory and go to http://localhost:8050/ in your browser.
+4. Set environment variables for your keys: 
 
-5. You could also run locally with Gunicorn, e.g.: `gunicorn app:server -w 4 -k gevent`
+`export PERSPECTIVE_KEY=[your-key-here]`
+`export TWITTER_KEY=[your-key-here]`
+`export TWITTER_SECRET=[your-key-here]`
+
+5. Run locally with `python app.py` from the project directory and go to http://localhost:8050/ in your browser.
+
+6. You could also run locally with Gunicorn, e.g.: `gunicorn app:server -w 4 -k gevent`
 
 ## Deploying to Heroku
 
@@ -38,4 +44,6 @@ One of the easiest and free-est ways to deploy is with Heroku (though it shouldn
 
 2. [Hook up Heroku](https://devcenter.heroku.com/articles/getting-started-with-python#deploy-the-app) with `heroku create` in the project directory and [connect a free-tier instance of Redis](https://devcenter.heroku.com/articles/heroku-redis) to your Heroku project with `heroku addons:create heroku-redis:hobby-dev -a harassment-dashboard`.
 
-3. And finally, deploy with `git push heroku master`.  Go to the address generated to confirm the app is deployed.  You can [adjust Gunicorn settings](https://devcenter.heroku.com/articles/python-gunicorn) in the Procfile. And you can [see logs](https://devcenter.heroku.com/articles/logging) for your project with `heroku logs -a harassment-dashboard`.
+3. Set environment variables for your keys in the [heroku dashboard or in terminal](https://medium.com/taqtilebr/managing-herokus-app-environment-variables-d13fd99610b).
+
+4. And finally, deploy with `git push heroku master`.  Go to the address generated to confirm the app is deployed.  You can [adjust Gunicorn settings](https://devcenter.heroku.com/articles/python-gunicorn) in the Procfile. And you can [see logs](https://devcenter.heroku.com/articles/logging) for your project with `heroku logs -a harassment-dashboard`.
