@@ -276,11 +276,6 @@ def make_table(clickData, tweets_json):
     new_df['toxicity'] = df['TOXICITY_score']
     return new_df.to_dict('records')
 
-def make_link(tweet_row):
-    return tweet_row['full_text']
-    #return html.A(html.Button(children=[tweet_row['text']]),
-    #              href=f"https://twitter.com/{tweet_row['scren_name']}/status/{tweet_row['id_str']}")
-
 @app.callback(Output('toggle', 'style'),
               [Input('submit-button', 'n_clicks')],
               state=[State('input-box', 'value')])
