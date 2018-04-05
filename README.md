@@ -3,7 +3,7 @@
 
 A hack based on Jigsaw's [Perspective API](https://www.perspectiveapi.com).  It is a simple dashboard that visualizes toxic langauge in tweets and allows you to jump into the conversation on twitter.  Just enter someone's twitter handle to see how much / if they are the target of toxicity and harassment.
 
-##requirements
+## Requirements
 
 1. python 3.6+
 2. Redis (right now only used for caching but hopefully to be used for a queue for intermediate results/loading soon)
@@ -14,11 +14,11 @@ The main libraries being used are Dash, a python data viz library that wraps up 
 
 For now, I'll assume you're on a mac:
 
-1. Make sure you have python 3.6: 
+1. Make sure you have python 3.6: ``
 
 2. Install redis with homebrew: `brew install redis` and `brew services start redis`.
 
-3. Install python dependencies: `pip install -r requirements`
+3. Activte a virtualenv and install python dependencies:`pip install -r requirements`
 
 4. From the project directory: `python app.py`
 
