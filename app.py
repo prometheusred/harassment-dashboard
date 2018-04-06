@@ -137,9 +137,12 @@ app.layout = html.Div([
             html.Div(children=[html.Div(children='Hover over time-series to see tweets...',
                                         id='full-text', style={'marginTop': '50px'}),
 
-                               html.A(html.Button(children=['Join the conversation!']),
-                                      id='join-link',
-                                      href='https://twitter.com'),],
+
+                               html.Div(id='join-link',
+                                        children=[html.A(
+                                            html.Button(children=['Join the conversation!']),
+                                      href='https://twitter.com'),]),
+            ],
                      style=right_text)
 
         ], style={'display': 'flex'})
@@ -192,41 +195,36 @@ def reset(tweets, input_value):
     return '@'
 
 
-@app.callback(Output('join-link', 'children'),
-              [Input('submit-button', 'n_clicks')],
-              state=[State('input-box', 'value')])
-def make_link(n_clicks, value):
-    """
-    Create a link to target's twitter profile
-    """
-    if not value or not n_clicks or value == '@':
-        raise PreventUpdate('no data yet!')
-    return html.A(html.Button(children=['Join the conversation!']),
-                  id='join-link',
-                  href='https://twitter.com/' + value[1:len(value)])
-
-"""
-Adds link to specific tweet -- for some reason causes infinite loop/
-callback won't stop firing.
-"""
 # @app.callback(Output('join-link', 'children'),
-#               [Input('toxicity-over-time', 'clickData'),
-#                Input('signal', 'children')])
-# def make_link_specific(clickData, tweets_json):
+#               [Input('submit-button', 'n_clicks')],
+#               state=[State('input-box', 'value')])
+# def make_link(n_clicks, value):
 #     """
 #     Create a link to target's twitter profile
 #     """
-#     print('**************')
-#     if not tweets_json or not clickData:
+#     if not value or not n_clicks or value == '@':
 #         raise PreventUpdate('no data yet!')
-#     tweets_df = pd.read_json(tweets_json, orient='split')
-#     clicked_index = clickData['points'][0]['x'] - 1
-#     tweet_id = tweets_df.iloc[clicked_index].get('id_str')
-#     tweeter = tweets_df.iloc[clicked_index]['user'].get('screen_name')
-#     link = f"https://twitter.com/{tweeter}/status/{tweet_id}"
 #     return html.A(html.Button(children=['Join the conversation!']),
 #                   id='join-link',
-#                   href=link)
+#                   href='https://twitter.com/' + value[1:len(value)])
+
+
+@app.callback(Output('join-link', 'children'),
+              [Input('toxicity-over-time', 'clickData'),
+               Input('signal', 'children')])
+def make_link_specific(clickData, tweets_json):
+    """
+    Create a link to target's twitter profile
+    """
+    if not tweets_json or not clickData:
+        raise PreventUpdate('no data yet!')
+    tweets_df = pd.read_json(tweets_json, orient='split')
+    clicked_index = clickData['points'][0]['x'] - 1
+    tweet_id = tweets_df.iloc[clicked_index].get('id_str')
+    tweeter = tweets_df.iloc[clicked_index]['user'].get('screen_name')
+    link = f"https://twitter.com/{tweeter}/status/{tweet_id}"
+    return html.A(html.Button(children=['Join the conversation!']),
+                  href=link)
 
 
 @app.callback(Output('full-text', 'children'),
@@ -329,6 +327,9 @@ def update_bar(tweets_json, handle):
         )
     }
 
+'''
+TODO: stacked area chart with buckets of < 10 tweets
+'''
 
 # @app.callback(Output('toxicity-area', 'figure'),
 #               [Input('signal', 'children')],
@@ -448,53 +449,6 @@ def update_graph(tweets_json, handle):
             type='layout'
         )
     }
-
-
-# HIGH_THRESH = 85
-# LOW_THRESH = 30
-
-# @app.callback(Output('toxicity-pie', 'figure'),
-#               [Input('signal', 'children')])
-# def update_pie(tweets_json):
-#     """
-#     Creates the pie graph of toxicity levels when recieving data.
-
-#     Returns:
-#         dictionary that defines a plotly pie chart with given data
-#     """
-#     if not tweets_json:
-#         raise PreventUpdate('no data yet!')
-
-#     tweets_df = pd.read_json(tweets_json, orient='split')
-#     labels = ['high', 'medium', 'low']
-#     values = [tweets_df[tweets_df['TOXICITY_score'] > HIGH_THRESH],
-#               tweets_df[(tweets_df['TOXICITY_score'] > LOW_THRESH) &
-#                         (tweets_df['TOXICITY_score'] < HIGH_THRESH)],
-#               tweets_df[tweets_df['TOXICITY_score'] < LOW_THRESH]]
-#     values = [len(value) for value in values]
-
-#     data = dict(
-#         labels=labels,
-#         values=values,
-#         text='toxicity',
-#         hoverinfo='percent',
-#         hole=.3,
-#         textinfo='label',
-#         type='pie',
-#     )
-
-#     return {
-#         'data': [data],
-#         'layout': dict(
-#             type='layout',
-#             showlegend=False,
-#             annotations=[{
-#                 'font': {'size': 14},
-#                 'showarrow': False,
-#                 'text': 'toxicity'}]
-#             )
-#     }
-
 
 @cache.memoize(timeout=60*30)  # 30 minutes
 def global_store(input_value):
