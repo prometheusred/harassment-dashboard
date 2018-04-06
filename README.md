@@ -28,9 +28,11 @@ For now, I'll assume you're on a mac:
 
 4. Set environment variables for your keys: 
 
-`export PERSPECTIVE_KEY=[your-key-here]`
-`export TWITTER_KEY=[your-key-here]`
-`export TWITTER_SECRET=[your-key-here]`
+```
+export PERSPECTIVE_KEY=[your-key-here]
+export TWITTER_KEY=[your-key-here]
+export TWITTER_SECRET=[your-key-here]
+```
 
 5. Run locally with `python app.py` from the project directory and go to http://localhost:8050/ in your browser.
 
