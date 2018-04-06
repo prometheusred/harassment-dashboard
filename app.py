@@ -51,16 +51,15 @@ center_el = {'width': '600px',
              'margin': '50px auto'}
 
 center_container = {'margin': '0px auto',
-                    'width': '340px',
+                    'justify-content': 'center',
+                    'display': 'flex',
                     'textAlign': 'center'}
 
 top_container = {'minWidth': '675px',
                  'minHeight': '500px',
                  'width': '100%'}
 
-left_el = {'float': 'left'}
-
-right_el = {'margin': '24px 0 0 -28px',
+right_el = {'margin': '24px 0 0 2px',
             'height': '38px'}
 
 left_graph = {'float': 'left',
@@ -85,8 +84,7 @@ app.layout = html.Div([
             html.Label(children='Twitter @handle'),
             dcc.Input(id='input-box',
                       type='text',
-                      value='@')],
-                 style=left_el),
+                      value='@')],),
 
         html.Button('Submit',
                     id='submit-button', style=right_el),],
