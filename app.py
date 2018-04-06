@@ -214,7 +214,7 @@ def reset(tweets, input_value):
                Input('signal', 'children')])
 def make_link_specific(clickData, tweets_json):
     """
-    Create a link to target's twitter profile
+    Create a link to tweeter's twitter profile
     """
     if not tweets_json or not clickData:
         raise PreventUpdate('no data yet!')
