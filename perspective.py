@@ -132,7 +132,6 @@ class Perspective(object):
             return await asyncio.gather(*tasks)
 
 
-
 def categorize_scores(tweets_df):
     """
     Adds toxicity category, display, and datetime info to tweets DataFrame

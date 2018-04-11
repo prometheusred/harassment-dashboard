@@ -104,18 +104,21 @@ app.layout = html.Div([
             html.Div(children=[dcc.Graph(id='toxicity-bar')],
                      style={'margin': '0 50px auto'}),
 
-            html.Div(dt.DataTable(
-                rows=[{'text': 'click bar graph above to select tweets',
-                       'author': 'na',
-                       'time': 'na',
-                       'toxicity': 'na'}],
-                row_selectable=True,
-                filterable=True,
-                sortable=True,
-                #row_height=40,
-                selected_row_indices=[],
-                id='datatable'
-            ), style={'margin': '10px auto'})
+            # html.Div(dt.DataTable(
+            #     rows=[{'text': 'click bar graph above to select tweets',
+            #            'author': 'na',
+            #            'time': 'na',
+            #            'test': 'na',
+            #            'toxicity': 'na'}],
+            #     row_selectable=True,
+            #     filterable=True,
+            #     sortable=True,
+            #     #row_height=40,
+            #     selected_row_indices=[],
+            #     id='datatable'
+            # ), style={'margin': '10px auto'})
+
+            html.Div(id='table-container', style={'margin': '0 50px 0 50px', 'minWidth': '650px'})
 
         ],
                  style=top_container),
@@ -128,12 +131,10 @@ app.layout = html.Div([
         html.P(children='(click on time-series to see tweets)',
                style={'margin': '0 0 50px', 'textAlign': 'center'}),
 
-
         html.Div(children=[
 
             dcc.Graph(id='toxicity-over-time', style={'minHeight': '500px','flex': '3'}),
 
-            #dcc.Graph(id='toxicity-pie', style=left_graph),
             html.Div(children=[html.Div(children='Hover over time-series to see tweets...',
                                         id='full-text', style={'marginTop': '50px'}),
 
@@ -224,7 +225,8 @@ def make_link_specific(clickData, tweets_json):
     tweeter = tweets_df.iloc[clicked_index]['user'].get('screen_name')
     link = f"https://twitter.com/{tweeter}/status/{tweet_id}"
     return html.A(html.Button(children=['Join the conversation!']),
-                  href=link)
+                  href=link,
+                  target='_blank')
 
 
 @app.callback(Output('full-text', 'children'),
@@ -234,7 +236,6 @@ def show_tweet(clickData, tweets_json):
     """
     Create text box to show tweet on hover
     """
-    print(clickData)
     if not tweets_json or not clickData:
         raise PreventUpdate('no data yet!')
     tweets_df = pd.read_json(tweets_json, orient='split')
@@ -245,13 +246,45 @@ def show_tweet(clickData, tweets_json):
     return dcc.Markdown(output_string)
 
 
-@app.callback(Output('datatable', 'rows'),
+'''
+make_table using dash/react component
+'''
+# @app.callback(Output('datatable', 'rows'),
+#               [Input('toxicity-bar', 'clickData'),
+#                Input('signal', 'children')])
+# def make_table(clickData, tweets_json):
+#     """
+#     filter table data according to toxicity level clicked on in bar chart
+#     """
+#     if not tweets_json or not clickData:
+#         raise PreventUpdate('no data yet!')
+#     tweets_df = pd.read_json(tweets_json, orient='split')
+#     clicked_tox_level = clickData['points'][0]['x']
+#     if clicked_tox_level == 'Low':
+#         df = tweets_df[tweets_df['LOW_LEVEL'] == True]
+#     elif clicked_tox_level == 'Medium':
+#         df = tweets_df[tweets_df['MED_LEVEL'] == True]
+#     elif clicked_tox_level == 'High':
+#         df = tweets_df[tweets_df['HI_LEVEL'] == True]
+#     new_df = pd.DataFrame()
+#     new_df['text'] = df['full_text']
+#     new_df['author'] = df['screen_name']
+#     new_df['time'] = df['display_time']
+#     new_df['toxicity'] = df['TOXICITY_score']
+#     return new_df.to_dict('records')
+
+
+'''
+make_table using html/css
+'''
+@app.callback(Output('table-container', 'children'),
               [Input('toxicity-bar', 'clickData'),
                Input('signal', 'children')])
 def make_table(clickData, tweets_json):
     """
     filter table data according to toxicity level clicked on in bar chart
     """
+    print('make_table')
     if not tweets_json or not clickData:
         raise PreventUpdate('no data yet!')
     tweets_df = pd.read_json(tweets_json, orient='split')
@@ -262,15 +295,49 @@ def make_table(clickData, tweets_json):
         df = tweets_df[tweets_df['MED_LEVEL'] == True]
     elif clicked_tox_level == 'High':
         df = tweets_df[tweets_df['HI_LEVEL'] == True]
+
     new_df = pd.DataFrame()
 
-    #new_df['text'] = df.apply(make_link, axis=1)
-    #new_df['text'] = html.A(html.Button('great'),href='https://twitter.com')
+    #failed attempt to get full text into a link instead of just author
+    #new_df['text'] = df['full_text'] #.apply(text_to_link, axis=1)
+    # links = []
+    # for index, row in df.iterrows():
+    #     tweet_id = row.get('id_str')
+    #     tweeter = row['user'].get('screen_name')
+    #     l = f"https://twitter.com/{tweeter}/status/{tweet_id}"
+    #     link = html.A(row['full_text'], href=l, target='_blank')
+    #     links.append(link)
+
     new_df['text'] = df['full_text']
-    new_df['author'] = df['screen_name']
+    new_df['author'] = df['screen_name'].apply(text_to_link)
+    #new_df['author'] = df['screen_name']
     new_df['time'] = df['display_time']
     new_df['toxicity'] = df['TOXICITY_score']
-    return new_df.to_dict('records')
+    return generate_table(new_df)
+
+def text_to_link(name):
+    """
+    convert screen name to link
+    this currently goes to tweeters page instead of specific link
+    """
+    #tweet_id = row.get('id_str')
+    #tweeter = row['user'].get('screen_name')
+    #link = f"https://twitter.com/{tweeter}/status/{tweet_id}"
+    link = f"https://twitter.com/{name}"
+    return html.A(html.P(children=[name]), href=link, target='_blank')
+    #return html.A('blah', href=link, target='_blank')
+
+def generate_table(dataframe, max_rows=10):
+    return html.Table(
+        # Header
+        [html.Tr([html.Th(col) for col in dataframe.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+        ]) for i in range(min(len(dataframe), max_rows))],
+    )
+
 
 @app.callback(Output('toggle', 'style'),
               [Input('submit-button', 'n_clicks')],
