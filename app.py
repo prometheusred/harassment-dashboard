@@ -44,7 +44,7 @@ colors = {
     'low': '#25C1F9',
 }
 
-explanation = 'This dashboard visualizes toxic language in Tweets and offers a way to engage to help the harassed.'
+explanation = "This dashboard visualizes toxic language in Tweets and offers a way to engage to help the harassed.  Just enter someone's twitter handle to see if they are the target of toxicity and harassment."
 
 center_el = {'width': '600px',
              'textAlign': 'center',
