@@ -59,6 +59,7 @@ stevedore==1.28.0
 traitlets==4.3.2
 tweepy==3.6.0
 urllib3==1.22
+uvloop==0.9.1
 vine==1.1.4
 virtualenv==15.1.0
 virtualenv-clone==0.3.0

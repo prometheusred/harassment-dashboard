@@ -5,6 +5,7 @@ import operator
 import asyncio
 from aiohttp import ClientSession
 from datetime import datetime
+import uvloop
 #import concurrent.futures
 
 
@@ -94,7 +95,8 @@ class Perspective(object):
     def async_scores(self, tweets_df, models=['TOXICITY', 'SEVERE_TOXICITY']):
         """
         """
-        loop = asyncio.new_event_loop()
+        #loop = asyncio.new_event_loop()
+        loop = uvloop.new_event_loop()
         asyncio.set_event_loop(loop)
         #loop = asyncio.get_event_loop()
         future = asyncio.ensure_future(

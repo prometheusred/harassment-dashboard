@@ -135,7 +135,7 @@ app.layout = html.Div([
 
             dcc.Graph(id='toxicity-over-time', style={'minHeight': '500px','flex': '3'}),
 
-            html.Div(children=[html.Div(children='Hover over time-series to see tweets...',
+            html.Div(children=[html.Div(children='click on time-series to see tweets...',
                                         id='full-text', style={'marginTop': '50px'}),
 
 
