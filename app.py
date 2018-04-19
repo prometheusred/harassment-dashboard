@@ -71,6 +71,12 @@ right_text = {'flex': '1',
               'align-self': 'center',
               'textAlign': 'left'}
 
+warning = {
+    'color': 'red',
+    'margin': '10px 20px 0 0',
+    'text-align': 'center',
+}
+
 app.layout = html.Div([
 
     html.H1(children='Help the Harassed', style=center_el),
@@ -90,6 +96,9 @@ app.layout = html.Div([
                     id='submit-button', style=right_el),],
 
              style=center_container),
+
+    html.P(id='warning', children='no tweets for this twitter handle.',
+           style={'display': 'none'}),
 
     html.Div(id='toggle', children=[
 
@@ -175,13 +184,13 @@ def request_scores(n_clicks, input_value):
     """
     if n_clicks:
         print('request_scores')
-        #try:
-        return global_store(input_value).to_json(date_format='iso',
+        try:
+            return global_store(input_value).to_json(date_format='iso',
                                                  orient='split')
-        #except Exception as e:
-            #print('**ERROR**')
-            #print(e)
-            #print(input_value)
+        except Exception as e:
+            print('**ERROR**')
+            print(e)
+            print(input_value)
 
 
 @app.callback(Output('input-box', 'value'),
@@ -195,6 +204,31 @@ def reset(tweets, input_value):
         raise PreventUpdate('no data yet!')
     return '@'
 
+@app.callback(Output('toggle', 'style'),
+              [Input('submit-button', 'n_clicks')],
+              state=[State('input-box', 'value')])
+def toggle_graphs(n_clicks, value):
+    """
+    show graphs after first submission
+    """
+    if n_clicks:
+        return {'display': 'block'}
+    else:
+        return {'display': 'none'}
+
+
+@app.callback(Output('warning', 'style'),
+              [Input('submit-button', 'n_clicks'),
+               Input('signal', 'children')])
+def toggle_warning(n_clicks, signal):
+    """
+    displays warning message if twitter handle returns 0 tweets
+    or errors.
+    """
+    if signal or n_clicks <= 0:
+        return {'display': 'none'}
+    else:
+        return warning
 
 # @app.callback(Output('join-link', 'children'),
 #               [Input('submit-button', 'n_clicks')],
@@ -337,19 +371,6 @@ def generate_table(dataframe, max_rows=10):
             html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
         ]) for i in range(min(len(dataframe), max_rows))],
     )
-
-
-@app.callback(Output('toggle', 'style'),
-              [Input('submit-button', 'n_clicks')],
-              state=[State('input-box', 'value')])
-def toggle_graphs(n_clicks, value):
-    """
-    show graphs after first submission
-    """
-    if n_clicks:
-        return {'display': 'block'}
-    else:
-        return {'display': 'none'}
 
 
 @app.callback(Output('toxicity-bar', 'figure'),
@@ -517,6 +538,7 @@ def update_graph(tweets_json, handle):
         )
     }
 
+
 @cache.memoize(timeout=60*30)  # 30 minutes
 def global_store(input_value):
     tweet_start = time.time()
@@ -534,6 +556,7 @@ def global_store(input_value):
         print(f"tweet request time: {tweet_time}")
         print(f"score request time: {score_time}")
         return tweets_df
+
 
 if __name__ == '__main__':
     app.run_server(debug=True, processes=6)
