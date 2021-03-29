@@ -46,7 +46,7 @@ plotly==2.4.1
 prompt-toolkit==1.0.15
 ptyprocess==0.5.2
 pycares==2.3.0
-Pygments==2.2.0
+Pygments==2.7.4
 PySocks==1.6.8
 python-dateutil==2.7.0
 pytz==2018.3
